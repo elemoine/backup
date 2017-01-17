@@ -1,0 +1,4 @@
+/home/elemoine/dotfiles
+/home/elemoine/nobackup
+/home/elemoine/scripts
+/home/elemoine/src
