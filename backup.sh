@@ -5,8 +5,18 @@ readonly ARGS="$@"
 readonly USERID=$(id --user --name)
 
 usage() {
-    echo "Usage: ${PROGNAME} -d <backup_directory> -k <key_id> [-x]"
-    exit 1
+    local exitcode=$1
+    cat <<- EOF
+Usage: ${PROGNAME} options
+
+OPTIONS:
+    -d <dir>      the backup target directory
+    -k <key>      the GPG key
+
+Example:
+    ${PROGNAME} -d /media/usb/backup -k E588ECCD
+EOF
+    exit $exitcode
 }
 
 error() {
@@ -58,7 +68,7 @@ main() {
                 readonly BACKUP_DIR=${OPTARG}
                 ;;
             h)
-                readonly BACKUP_HOST=${OPTARG}
+                usage 0
                 ;;
             k)
                 readonly BACKUP_KEYID=${OPTARG}
@@ -68,13 +78,13 @@ main() {
                 set -x
                 ;;
             \?)
-                usage
+                usage 1
                 ;;
         esac
     done
 
-    [[ -n ${BACKUP_DIR} ]] || usage
-    [[ -n ${BACKUP_KEYID} ]] || usage
+    [[ -n ${BACKUP_DIR} ]] || usage 1
+    [[ -n ${BACKUP_KEYID} ]] || usage 1
 
     do_backup_file ${BACKUP_DIR} ${BACKUP_KEYID}
 }
