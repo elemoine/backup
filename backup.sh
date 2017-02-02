@@ -1,6 +1,9 @@
 #!/bin/bash
 
+. "functions.sh"
+
 readonly PROGNAME=$(basename $0)
+readonly PROGDIR=$(readlink -m $(dirname $0))
 readonly ARGS="$@"
 readonly USERID=$(id --user --name)
 
@@ -17,22 +20,6 @@ Example:
     ${PROGNAME} -d /media/usb/backup -k E588ECCD
 EOF
     exit $exitcode
-}
-
-error() {
-    local errmsg="$1"
-    echo "Error: ${errmsg}"
-    exit 1
-}
-
-log_info() {
-    local msg="$1"
-    echo "${msg}"
-}
-
-log_debug() {
-    local msg="$1"
-    [[ -n ${BACKUP_DEBUG} ]] && echo "${msg}"
 }
 
 _do_backup() {
