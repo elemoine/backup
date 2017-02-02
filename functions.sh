@@ -47,7 +47,7 @@ _do_restore() {
     log_debug "Restore source: ${restore_source}"
     log_debug "Restore target: ${restore_target}"
     log_debug "Restore key: ${restore_keyid}"
-    local opts="--encrypt-sign-key ${restore_keyid} --use-agent"
+    local opts="--encrypt-key ${restore_keyid} --use-agent"
     [[ -n ${BACKUP_RESTORE_DEBUG} ]] && opts="--verbosity info ${opts}"
     duplicity ${opts} ${restore_source} ${restore_target}
 }
