@@ -63,6 +63,7 @@ do_restore_test_with_file() {
     local restore_dir=$1
     local restore_keyid=$2
     [[ -d ${restore_dir} ]] || error "${restore_dir} does not exist"
+    rm -rf /tmp/restore-test.* # remove any previous restore test dir
     local temp_dir=$(mktemp -d -p /tmp restore-test.XXXXXXXXXX)
     log_info "Restore test target directory: ${temp_dir}"
     _do_restore "file://${restore_dir}" "${temp_dir}" "${restore_keyid}"
