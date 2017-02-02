@@ -15,18 +15,18 @@ Usage: ${PROGNAME} options
 OPTIONS:
     -s <dir>      the source directory
     -k <key>      the GPG key
-    -n            restore in a temp dir instead of ${HOME}
+    -t            restore in a temp dir instead of ${HOME}
     -x            increase verbosity
 
 Example:
-    ${PROGNAME} -s /media/usb/backup -k E588ECCD -n
+    ${PROGNAME} -s /media/usb/backup -k E588ECCD -t
 EOF
     exit $exitcode
 }
 
 main() {
 
-    while getopts ":s:h:k:xn" opt
+    while getopts ":s:h:k:xt" opt
     do
         case "${opt}" in
             s)
@@ -41,7 +41,7 @@ main() {
             x)
                 declare -g -r BACKUP_RESTORE_DEBUG=1
                 ;;
-            n)
+            t)
                 readonly RESTORE_TEST=1
                 ;;
             \?)
