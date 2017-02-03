@@ -6,3 +6,4 @@
 /home/elemoine/soft
 /home/elemoine/src
 /home/elemoine/.cache
+/home/elemoine/.vagrant.d/boxes
