@@ -32,7 +32,11 @@ _do_backup_home() {
     log_debug "Backup target: ${target}"
     log_debug "Backup sign key: ${backup_sign_key}"
     log_debug "Backup encrypt key: ${backup_encrypt_key}"
-    local opts="--sign-key ${backup_sign_key} --encrypt-key ${backup_encrypt_key} --use-agent --exclude-filelist excludes.txt"
+    local opts=
+    # full backup if latest full backup is older than 1 month
+    opts="--full-if-older-than 1M"
+    opts="${opts} --sign-key ${backup_sign_key} --encrypt-key ${backup_encrypt_key}"
+    opts="${opts} --use-agent --exclude-filelist excludes.txt"
     [[ -n ${BACKUP_RESTORE_DEBUG} ]] && opts="--verbosity info ${opts}"
     duplicity ${opts} ${HOME} ${target}
 }
