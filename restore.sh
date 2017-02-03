@@ -13,13 +13,15 @@ usage() {
 Usage: ${PROGNAME} options
 
 OPTIONS:
-    -s <dir>      the source directory
-    -k <key>      the GPG key
+    -d <dir>      the source directory
+    -s <key>      the GPG sign key
+    -e <key>      the GPG encrypt key
     -t            restore in a temp dir instead of ${HOME}
-    -x            increase verbosity
+    -h            help
+    -v            increase verbosity
 
 Example:
-    ${PROGNAME} -s /media/usb/backup -k E588ECCD -t
+    ${PROGNAME} -d /media/usb/backup -s 5BBF59DF126FADEF -e 57F334375840CA38 -t -v
 EOF
     exit $exitcode
 }
@@ -27,51 +29,58 @@ EOF
 _do_restore() {
     local restore_source=$1
     local restore_target=$2
-    local restore_keyid=$3
+    local restore_sign_key=$3
+    local restore_encrypt_key=$4
     log_debug "Restore source: ${restore_source}"
     log_debug "Restore target: ${restore_target}"
-    log_debug "Restore key: ${restore_keyid}"
-    local opts="--encrypt-key ${restore_keyid} --use-agent"
+    log_debug "Restore sign key: ${restore_sign_key}"
+    log_debug "Restore encrypt key: ${restore_encrypt_key}"
+    local opts="--sign-key ${restore_sign_key} --encrypt-key ${restore_encrypt_key} --use-agent"
     [[ -n ${BACKUP_RESTORE_DEBUG} ]] && opts="--verbosity info ${opts}"
     duplicity ${opts} ${restore_source} ${restore_target}
 }
 
 do_restore_home_with_file() {
     local restore_dir=$1
-    local restore_keyid=$2
+    local restore_sign_key=$2
+    local restore_encrypt_key=$3
     [[ -d ${restore_dir} ]] || error "${restore_dir} does not exist"
-    _do_restore "file://${restore_dir}" "${HOME}" "${restore_keyid}"
+    _do_restore "file://${restore_dir}" "${HOME}" "${restore_sign_key}" "${restore_encrypt_key}"
 }
 
 do_restore_test_with_file() {
     local restore_dir=$1
-    local restore_keyid=$2
+    local restore_sign_key=$2
+    local restore_encrypt_key=$3
     [[ -d ${restore_dir} ]] || error "${restore_dir} does not exist"
     rm -rf /tmp/restore-test.* # remove any previous restore test dir
     local temp_dir=$(mktemp -d -p /tmp restore-test.XXXXXXXXXX)
     log_info "Restore test target directory: ${temp_dir}"
-    _do_restore "file://${restore_dir}" "${temp_dir}" "${restore_keyid}"
+    _do_restore "file://${restore_dir}" "${temp_dir}" "${restore_sign_key}" "${restore_encrypt_key}"
 }
 
 main() {
 
-    while getopts ":s:h:k:xt" opt
+    while getopts ":d:s:e:thv" opt
     do
         case "${opt}" in
-            s)
+            d)
                 readonly RESTORE_DIR=${OPTARG}
+                ;;
+            s)
+                readonly RESTORE_SIGN_KEY=${OPTARG}
+                ;;
+            e)
+                readonly RESTORE_ENCRYPT_KEY=${OPTARG}
+                ;;
+            t)
+                readonly RESTORE_TEST=1
                 ;;
             h)
                 usage 0
                 ;;
-            k)
-                readonly RESTORE_KEYID=${OPTARG}
-                ;;
-            x)
+            v)
                 declare -g -r BACKUP_RESTORE_DEBUG=1
-                ;;
-            t)
-                readonly RESTORE_TEST=1
                 ;;
             \?)
                 usage 1
@@ -80,13 +89,14 @@ main() {
     done
 
     [[ -n ${RESTORE_DIR} ]] || usage 1
-    [[ -n ${RESTORE_KEYID} ]] || usage 1
+    [[ -n ${RESTORE_SIGN_KEY} ]] || usage 1
+    [[ -n ${RESTORE_ENCRYPT_KEY} ]] || usage 1
 
     if [[ -n ${RESTORE_TEST} ]];
     then
-        do_restore_test_with_file ${RESTORE_DIR} ${RESTORE_KEYID}
+        do_restore_test_with_file ${RESTORE_DIR} ${RESTORE_SIGN_KEY} ${RESTORE_ENCRYPT_KEY}
     else
-        do_restore_home_with_file ${RESTORE_DIR} ${RESTORE_KEYID}
+        do_restore_home_with_file ${RESTORE_DIR} ${RESTORE_SIGN_KEY} ${RESTORE_ENCRYPT_KEY}
     fi
 }
 
