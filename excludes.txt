@@ -3,5 +3,6 @@
 /home/elemoine/local
 /home/elemoine/nobackup
 /home/elemoine/scripts
+/home/elemoine/soft
 /home/elemoine/src
 /home/elemoine/.cache
