@@ -8,3 +8,4 @@
 /home/elemoine/src
 /home/elemoine/.cache
 /home/elemoine/.vagrant.d/boxes
+/home/elemoine/.virtualenvs
