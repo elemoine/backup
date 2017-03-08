@@ -21,7 +21,7 @@ OPTIONS:
     -v            increase verbosity
 
 Example:
-    ${PROGNAME} -d /media/usb/backup -s 5BBF59DF126FADEF -e 57F334375840CA38 -t -v
+    ./${PROGNAME} -d /media/usb/backup -s 5BBF59DF126FADEF -e 57F334375840CA38 -t -v
 EOF
     exit $exitcode
 }
