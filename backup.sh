@@ -18,6 +18,7 @@ OPTIONS:
     -e <key>      the GPG encrypt key
     -h            help
     -v            increase verbosity
+    -n            dry-run
 
 Example:
     ./${PROGNAME} -d /media/usb/backup -s 5BBF59DF126FADEF -e 57F334375840CA38 -v
@@ -29,6 +30,7 @@ _do_backup_home() {
     local target=$1
     local backup_sign_key=$2
     local backup_encrypt_key=$3
+    local backup_dryrun=$4
     log_debug "Backup target: ${target}"
     log_debug "Backup sign key: ${backup_sign_key}"
     log_debug "Backup encrypt key: ${backup_encrypt_key}"
@@ -38,28 +40,32 @@ _do_backup_home() {
     opts="${opts} --sign-key ${backup_sign_key} --encrypt-key ${backup_encrypt_key}"
     opts="${opts} --use-agent --exclude-filelist excludes.txt"
     [[ -n ${BACKUP_RESTORE_DEBUG} ]] && opts="--verbosity info ${opts}"
+    [[ -n ${backup_dryrun} ]] && opts="--dry-run ${opts}"
     duplicity ${opts} ${HOME} ${target}
+    log_info "Command run: duplicity ${opts} ${HOME} ${target}"
 }
 
 do_backup_home_with_file() {
     local backup_dir=$1
     local backup_sign_key=$2
     local backup_encrypt_key=$3
+    local backup_dryrun=$4
     [[ -d ${backup_dir} ]] || error "${backup_dir} does not exist"
-    _do_backup_home "file://${backup_dir}" "${backup_sign_key}" "${backup_encrypt_key}"
+    _do_backup_home "file://${backup_dir}" "${backup_sign_key}" "${backup_encrypt_key}" "${backup_dryrun}"
 }
 
 do_backup_home_with_scp() {
     local backup_host=$1
     local backup_sign_key=$2
     local backup_encrypt_key=$3
+    local backup_dryrun=$4
     local backup_dir="/share/MD0_DATA/homes/admin/backups/workstations/${USERID}"
-    _do_backup_home "scp://${backup_host}/${backup_dir}" "${backup_sign_key}" "${backup_encrypt_key}"
+    _do_backup_home "scp://${backup_host}/${backup_dir}" "${backup_sign_key}" "${backup_encrypt_key}" "${backup_dryrun}"
 }
 
 main() {
 
-    while getopts ":d:s:e:hv" opt
+    while getopts ":d:s:e:hvn" opt
     do
         case "${opt}" in
             d)
@@ -77,6 +83,9 @@ main() {
             v)
                 declare -g -r BACKUP_RESTORE_DEBUG=1
                 ;;
+            n)
+                readonly BACKUP_DRYRUN=1
+                ;;
             \?)
                 usage 1
                 ;;
@@ -87,7 +96,7 @@ main() {
     [[ -n ${BACKUP_SIGN_KEY} ]] || usage 1
     [[ -n ${BACKUP_ENCRYPT_KEY} ]] || usage 1
 
-    do_backup_home_with_file ${BACKUP_DIR} ${BACKUP_SIGN_KEY} ${BACKUP_ENCRYPT_KEY}
+    do_backup_home_with_file ${BACKUP_DIR} ${BACKUP_SIGN_KEY} ${BACKUP_ENCRYPT_KEY} ${BACKUP_DRYRUN}
 }
 
 main ${ARGS}
