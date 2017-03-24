@@ -17,7 +17,7 @@ only supported Duplicity backend at this point.
 
 `-s` is used to specify the GPG key to use for signing, and `-e` the one for
 encrypting. For example, use `gpg2 --list-secret-keys
---with-subkeys--fingerprint your.email@blabla.com` to know the id of your key.
+--with-subkey-fingerprint your.email@blabla.com` to know the id of your key.
 
 ## Restore
 
