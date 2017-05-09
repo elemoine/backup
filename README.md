@@ -3,6 +3,11 @@
 The `backup.sh` script is used to back up the user's homedir (`$HOME`). And
 `restore.sh` is used to restore it.
 
+Warning: these scripts do not work with Duplicity 0.7.12, because of a bug in
+that version. See https://bugs.launchpad.net/duplicity/+bug/1687291. So 0.7.11
+should be used for now. See below for how to install Duplicity 0.7.11 in
+a virtual environment.
+
 ## Backup
 
 Use `backup.sh -h` to know how to use `backup.sh` to back up your homedir.
@@ -37,3 +42,10 @@ key, respectively.
 `-t` means create a temporary directory in `/tmp` and do the restore in this
 directory. This is useful for testing restores and when you don't want to mess
 up with your homedir.
+
+## Install Duplicity 0.7.11 in a virtual environment
+
+```bash
+$ virtualenv duplicity
+$ pip install https://code.launchpad.net/duplicity/0.7-series/0.7.11/+download/duplicity-0.7.11.tar.gz
+```
