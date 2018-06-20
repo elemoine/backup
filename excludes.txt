@@ -10,3 +10,4 @@
 /home/elemoine/.npm
 /home/elemoine/.vagrant.d/boxes
 /home/elemoine/.virtualenvs
+/home/elemoine/.password-store
