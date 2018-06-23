@@ -30,7 +30,7 @@ Use `restore.sh -h` to know how to use `restore.sh` to restore your homedir.
 Here is an example:
 
 ```bash
-$ ./restore -d /media/usb/backup -s 5BBF59DF126FADEF -e 57F334375840CA38 -t -v
+$ ./restore.sh -d /media/usb/backup -s 5BBF59DF126FADEF -e 57F334375840CA38 -t -v
 ```
 
 `-d` is used to specify the source directory of the restore operation. Again,
