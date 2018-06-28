@@ -35,9 +35,12 @@ _do_restore() {
     local restore_dryrun=$5
     log_debug "Restore source: ${restore_source}"
     log_debug "Restore target: ${restore_target}"
-    log_debug "Restore sign key: ${restore_sign_key}"
-    log_debug "Restore encrypt key: ${restore_encrypt_key}"
-    local opts="--sign-key ${restore_sign_key} --encrypt-key ${restore_encrypt_key} --use-agent"
+    [[ ${restore_sign_key} != "none" ]] && log_debug "Restore sign key: ${restore_sign_key}"
+    [[ ${restore_encrypt_key} != "none" ]] && log_debug "Restore encrypt key: ${restore_encrypt_key}"
+    local opts=""
+    [[ ${restore_sign_key} != "none" ]] && opts="${opts} --sign-key ${restore_sign_key}"
+    [[ ${restore_encrypt_key} != "none" ]] && opts="${opts} --encrypt-key ${restore_encrypt_key}"
+    [[ ${restore_sign_key} != "none" || ${restore_encrypt_key} != "none" ]] && opts="${opts} --use-agent"
     [[ -n ${BACKUP_RESTORE_DEBUG} ]] && opts="--verbosity info ${opts}"
     [[ -n ${restore_dryrun} ]] && opts="--dry-run ${opts}"
     duplicity ${opts} ${restore_source} ${restore_target}
@@ -98,8 +101,8 @@ main() {
     done
 
     [[ -n ${RESTORE_DIR} ]] || usage 1
-    [[ -n ${RESTORE_SIGN_KEY} ]] || usage 1
-    [[ -n ${RESTORE_ENCRYPT_KEY} ]] || usage 1
+    [[ -n ${RESTORE_SIGN_KEY} ]] || readonly RESTORE_SIGN_KEY="none"
+    [[ -n ${RESTORE_ENCRYPT_KEY} ]] || readonly RESTORE_ENCRYPT_KEY="none"
 
     if [[ -n ${RESTORE_TEST} ]];
     then

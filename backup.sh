@@ -32,13 +32,14 @@ _do_backup_home() {
     local backup_encrypt_key=$3
     local backup_dryrun=$4
     log_debug "Backup target: ${target}"
-    log_debug "Backup sign key: ${backup_sign_key}"
-    log_debug "Backup encrypt key: ${backup_encrypt_key}"
-    local opts=
+    [[ ${backup_sign_key} != "none" ]] && log_debug "Backup sign key: ${backup_sign_key}"
+    [[ ${backup_encrypt_key} != "none" ]] && log_debug "Backup encrypt key: ${backup_encrypt_key}"
     # full backup if latest full backup is older than 1 month
-    opts="--full-if-older-than 1M"
-    opts="${opts} --sign-key ${backup_sign_key} --encrypt-key ${backup_encrypt_key}"
-    opts="${opts} --use-agent --exclude-filelist excludes.txt"
+    local opts="--full-if-older-than 1M"
+    [[ ${backup_sign_key} != "none" ]] && opts="${opts} --sign-key ${backup_sign_key}"
+    [[ ${backup_encrypt_key} != "none" ]] && opts="${opts} --encrypt-key ${backup_encrypt_key}"
+    [[ ${backup_sign_key} != "none" || ${backup_encrypt_key} != "none" ]] && opts="${opts} --use-agent"
+    opts="${opts} --exclude-filelist excludes.txt"
     [[ -n ${BACKUP_RESTORE_DEBUG} ]] && opts="--verbosity info ${opts}"
     [[ -n ${backup_dryrun} ]] && opts="--dry-run ${opts}"
     duplicity ${opts} ${HOME} ${target}
@@ -93,8 +94,8 @@ main() {
     done
 
     [[ -n ${BACKUP_DIR} ]] || usage 1
-    [[ -n ${BACKUP_SIGN_KEY} ]] || usage 1
-    [[ -n ${BACKUP_ENCRYPT_KEY} ]] || usage 1
+    [[ -n ${BACKUP_SIGN_KEY} ]] || readonly BACKUP_SIGN_KEY="none"
+    [[ -n ${BACKUP_ENCRYPT_KEY} ]] || readonly BACKUP_ENCRYPT_KEY="none"
 
     do_backup_home_with_file ${BACKUP_DIR} ${BACKUP_SIGN_KEY} ${BACKUP_ENCRYPT_KEY} ${BACKUP_DRYRUN}
 }
