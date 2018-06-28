@@ -13,16 +13,13 @@ usage() {
 Usage: ${PROGNAME} options
 
 OPTIONS:
-    -d <dir>      the source directory
-    -s <key>      the GPG sign key
-    -e <key>      the GPG encrypt key
+    -d <dir>      the backup repository
     -t            restore in a temp dir instead of ${HOME}
     -h            help
     -v            increase verbosity
-    -n            dry-run
 
 Example:
-    ./${PROGNAME} -d /media/usb/backup -s 5BBF59DF126FADEF -e 57F334375840CA38 -t -v
+    ./${PROGNAME} -d /media/usb/backup -t -v
 EOF
     exit $exitcode
 }
@@ -30,54 +27,36 @@ EOF
 _do_restore() {
     local restore_source=$1
     local restore_target=$2
-    local restore_sign_key=$3
-    local restore_encrypt_key=$4
-    local restore_dryrun=$5
     log_debug "Restore source: ${restore_source}"
     log_debug "Restore target: ${restore_target}"
-    log_debug "Restore sign key: ${restore_sign_key}"
-    log_debug "Restore encrypt key: ${restore_encrypt_key}"
-    local opts="--sign-key ${restore_sign_key} --encrypt-key ${restore_encrypt_key} --use-agent"
-    [[ -n ${BACKUP_RESTORE_DEBUG} ]] && opts="--verbosity info ${opts}"
-    [[ -n ${restore_dryrun} ]] && opts="--dry-run ${opts}"
-    duplicity ${opts} ${restore_source} ${restore_target}
-    log_info "Command run: duplicity ${opts} ${restore_source} ${restore_target}"
+    local globalflags="-r ${restore_source}"
+    [[ -n ${BACKUP_RESTORE_DEBUG} ]] && globflags="${globalflags} -v"
+    restic ${globalflags} restore latest --target ${restore_target}
+    log_info "Command run: restic ${globalflags} restore latest --target ${restore_target}"
 }
 
-do_restore_home_with_file() {
+do_restore_home() {
     local restore_dir=$1
-    local restore_sign_key=$2
-    local restore_encrypt_key=$3
-    local restore_dryrun=$4
     [[ -d ${restore_dir} ]] || error "${restore_dir} does not exist"
-    _do_restore "file://${restore_dir}" "${HOME}" "${restore_sign_key}" "${restore_encrypt_key}" "${restore_dryrun}"
+    _do_restore "${restore_dir}" "${HOME}"
 }
 
-do_restore_test_with_file() {
+do_restore_test() {
     local restore_dir=$1
-    local restore_sign_key=$2
-    local restore_encrypt_key=$3
-    local restore_dryrun=$4
     [[ -d ${restore_dir} ]] || error "${restore_dir} does not exist"
     rm -rf /tmp/restore-test.* # remove any previous restore test dir
     local temp_dir=$(mktemp -d -p /tmp restore-test.XXXXXXXXXX)
     log_info "Restore test target directory: ${temp_dir}"
-    _do_restore "file://${restore_dir}" "${temp_dir}" "${restore_sign_key}" "${restore_encrypt_key}" "${restore_dryrun}"
+    _do_restore "${restore_dir}" "${temp_dir}"
 }
 
 main() {
 
-    while getopts ":d:s:e:thvn" opt
+    while getopts ":d:thv" opt
     do
         case "${opt}" in
             d)
                 readonly RESTORE_DIR=${OPTARG}
-                ;;
-            s)
-                readonly RESTORE_SIGN_KEY=${OPTARG}
-                ;;
-            e)
-                readonly RESTORE_ENCRYPT_KEY=${OPTARG}
                 ;;
             t)
                 readonly RESTORE_TEST=1
@@ -88,9 +67,6 @@ main() {
             v)
                 declare -g -r BACKUP_RESTORE_DEBUG=1
                 ;;
-            n)
-                readonly RESTORE_DRYRUN=1
-                ;;
             \?)
                 usage 1
                 ;;
@@ -98,14 +74,12 @@ main() {
     done
 
     [[ -n ${RESTORE_DIR} ]] || usage 1
-    [[ -n ${RESTORE_SIGN_KEY} ]] || usage 1
-    [[ -n ${RESTORE_ENCRYPT_KEY} ]] || usage 1
 
     if [[ -n ${RESTORE_TEST} ]];
     then
-        do_restore_test_with_file ${RESTORE_DIR} ${RESTORE_SIGN_KEY} ${RESTORE_ENCRYPT_KEY} ${RESTORE_DRYRUN}
+        do_restore_test ${RESTORE_DIR}
     else
-        do_restore_home_with_file ${RESTORE_DIR} ${RESTORE_SIGN_KEY} ${RESTORE_ENCRYPT_KEY} ${RESTORE_DRYRUN}
+        do_restore_home ${RESTORE_DIR}
     fi
 }
 
