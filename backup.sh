@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 . "functions.sh"
 
 readonly PROGNAME=$(basename $0)
