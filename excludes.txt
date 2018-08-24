@@ -7,6 +7,7 @@
 /home/elemoine/soft
 /home/elemoine/src
 /home/elemoine/.cache
+/home/elemoine/.ccache
 /home/elemoine/.mozilla
 /home/elemoine/.npm
 /home/elemoine/.nvm
