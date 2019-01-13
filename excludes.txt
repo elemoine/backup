@@ -1,5 +1,6 @@
 /home/elemoine/Downloads
 /home/elemoine/VirtualBox VMs
+/home/elemoine/aur
 /home/elemoine/dotfiles
 /home/elemoine/local
 /home/elemoine/nobackup
