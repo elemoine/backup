@@ -31,7 +31,11 @@ do_backup_home() {
     local globalflags="-r ${repository}"
     [[ -n ${BACKUP_RESTORE_DEBUG} ]] && globflags="${globalflags} -v"
     local flags="--exclude-file excludes.txt"
+    set +e
     restic ${globalflags} backup ${flags} ${HOME}
+    local exitcode=$?
+    [[ $exitcode == -1 ]] && error "restic backup failed"
+    set -e
     restic ${globalflags} check
     restic ${globalflags} snapshots
     log_info "Command run: restic ${globalflags} backup ${flags} ${HOME}"
