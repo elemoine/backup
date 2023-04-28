@@ -40,7 +40,7 @@ _do_restore() {
 do_restore_home() {
     local restore_dir=$1
     [[ -d ${restore_dir} ]] || error "${restore_dir} does not exist"
-    _do_restore "${restore_dir}" "${HOME}"
+    _do_restore "${restore_dir}" /
 }
 
 do_restore_test() {
